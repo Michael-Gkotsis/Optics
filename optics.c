@@ -69,65 +69,65 @@ int main(int argc, char *argv[])
         // All the necessary memory allocation
 
         double **X;   // Array of Elements
-        X = calloc(n, sizeof(double));
+        X =(double **)calloc(n, sizeof(double *));
         for (d = 0; d < n; d++)
-        X[d] = calloc(dim, sizeof(double));
+        X[d] =(double *)calloc(dim, sizeof(double));
 
         int *Cluster;
-        Cluster = calloc(n,sizeof(int));
+        Cluster =(int *)calloc(n,sizeof(int));
 
         for(i = 0; i < n; i++)
         Cluster[i] = -1;
 
         int *visited; //Array for knowning which elements are visited and which are not
-        visited = calloc(n,sizeof(int));
+        visited =(int *) calloc(n,sizeof(int));
 
         for(i = 0; i < n; i++)
         visited[i] = 0; //0 for unvisited , 1 for visited
 
         double *distance; //array for holding distances of element i with each db element
-        distance = calloc(n,sizeof(double));
+        distance =(double *) calloc(n,sizeof(double));
 
         int *numPoints; //Array for holding the Neighborhood's size of each i element
-        numPoints = calloc(n,sizeof(int));
+        numPoints =(int *) calloc(n,sizeof(int));
 
         int *belong; //array for holding boolean value of an element belong to a Neighborhood
-        belong = calloc(n,sizeof(int));
+        belong =(int *) calloc(n,sizeof(int));
 
         int *nBelong; //array for holding boolean value of an element belong to a Neighborhood
-        nBelong = calloc(n,sizeof(int));
+        nBelong =(int *) calloc(n,sizeof(int));
 
         int *Noise; //Flag for points that are Noise
-        Noise = calloc(n,sizeof(int));
+        Noise =(int *) calloc(n,sizeof(int));
         for(i = 0; i < n; i++)
         Noise[i] = 1;
 
         int *Core;  //Flag for core points,  0 for border, 1 for Core
-        Core = calloc(n,sizeof(int));
+        Core = (int *)calloc(n,sizeof(int));
         for(i = 0; i < n; i++)
         Core[i] = 0;
 
         double **distance2 ;   //Array for holding Distances for each core point of a Neighborhood with Each Element of the dataset
-        distance2 = calloc(n,sizeof(double));
+        distance2 =(double **) calloc(n,sizeof(double *));
         for(i = 0; i < n; i++)
-        distance2[i] = calloc(n,sizeof(double));
+        distance2[i] =(double *) calloc(n,sizeof(double));
 
         double **OrderList;   // Array of Elements
-        OrderList = calloc(n, sizeof(double));
+        OrderList =(double **) calloc(n, sizeof(double *));
         for (d = 0; d < n; d++)
-        OrderList[d] = calloc(dim, sizeof(double));
+        OrderList[d] = (double *)calloc(dim, sizeof(double));
 
         double *OrderReachabilityDistance; //Array for holding ordered reachability distances
-        OrderReachabilityDistance = calloc(n,sizeof(double));
+        OrderReachabilityDistance = (double *)calloc(n,sizeof(double));
 
         double *coreDistance; //Array for holding core distances for each Core element
-        coreDistance = calloc(n,sizeof(double));
+        coreDistance =(double *) calloc(n,sizeof(double));
 
         double *tempReachabilityDistance; //Array for holding ordered reachability distances
-        tempReachabilityDistance = calloc(n,sizeof(double));
+        tempReachabilityDistance =(double *) calloc(n,sizeof(double));
 
         double *reachabilityDistance; //Array for holding reachability distance for each element
-        reachabilityDistance = calloc(n,sizeof(double));
+        reachabilityDistance =(double *) calloc(n,sizeof(double));
 
         for(i = 0; i < n; i++)
         {
@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
         }
 
         int *Seed;
-        Seed = calloc(n,sizeof(int));
+        Seed =(int *) calloc(n,sizeof(int));
         for(i = 0; i < n; i++)
         Seed[i] = 0;
 
@@ -512,7 +512,8 @@ free(fileName);
 }
 
 /* -------------------------------------------------------------------------- */
-
+for(i = 0; i < n; i++)
+free(X[i]);
 free(X);
 free(Cluster);
 free(visited);
@@ -522,7 +523,11 @@ free(belong);
 free(numPoints);
 free(distance);
 free(Core);
+for(i = 0; i < n; i++)
+free(distance2[i]);
 free(distance2);
+for(i = 0; i < n; i++)
+free(OrderList[i]);
 free(OrderList);
 free(OrderReachabilityDistance);
 free(coreDistance);
