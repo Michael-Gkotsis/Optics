@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 
     printf("\n Elements:%d \n", n-1);
     printf("\n Dimensions:%d \n", dim);
-
+     n--;
     printf("Give the amount of Minimum Points: ");
     scanf("%d",&minPoints );
     printf("Give the Generating Distance: ");
@@ -68,25 +68,21 @@ int main(int argc, char *argv[])
 /* -------------------------------------------------------------------------- */
         // All the necessary memory allocation
 
-        double **X;   // Array of Elements
-        X =(double **)calloc(n, sizeof(double *));
-        for (d = 0; d < n; d++)
-        X[d] =(double *)calloc(dim, sizeof(double));
+        float *X;   // Array of Elements
+        X =(float *)calloc(n*dim, sizeof(float *));
+
 
         int *Cluster;
         Cluster =(int *)calloc(n,sizeof(int));
 
-        for(i = 0; i < n; i++)
-        Cluster[i] = -1;
 
         int *visited; //Array for knowning which elements are visited and which are not
         visited =(int *) calloc(n,sizeof(int));
 
-        for(i = 0; i < n; i++)
-        visited[i] = 0; //0 for unvisited , 1 for visited
 
-        double *distance; //array for holding distances of element i with each db element
-        distance =(double *) calloc(n,sizeof(double));
+
+        float *distance; //array for holding distances of element i with each db element
+        distance =(float *) calloc(n,sizeof(float));
 
         int *numPoints; //Array for holding the Neighborhood's size of each i element
         numPoints =(int *) calloc(n,sizeof(int));
@@ -99,53 +95,54 @@ int main(int argc, char *argv[])
 
         int *Noise; //Flag for points that are Noise
         Noise =(int *) calloc(n,sizeof(int));
-        for(i = 0; i < n; i++)
-        Noise[i] = 1;
+
 
         int *Core;  //Flag for core points,  0 for border, 1 for Core
         Core = (int *)calloc(n,sizeof(int));
-        for(i = 0; i < n; i++)
-        Core[i] = 0;
 
-        double **distance2 ;   //Array for holding Distances for each core point of a Neighborhood with Each Element of the dataset
-        distance2 =(double **) calloc(n,sizeof(double *));
-        for(i = 0; i < n; i++)
-        distance2[i] =(double *) calloc(n,sizeof(double));
 
-        double **OrderList;   // Array of Elements
-        OrderList =(double **) calloc(n, sizeof(double *));
-        for (d = 0; d < n; d++)
-        OrderList[d] = (double *)calloc(dim, sizeof(double));
+        float *distance2 ;   //Array for holding Distances for each core point of a Neighborhood with Each Element of the dataset
+        distance2 =(float *) calloc(n*n,sizeof(float));
 
-        double *OrderReachabilityDistance; //Array for holding ordered reachability distances
-        OrderReachabilityDistance = (double *)calloc(n,sizeof(double));
 
-        double *coreDistance; //Array for holding core distances for each Core element
-        coreDistance =(double *) calloc(n,sizeof(double));
+        float *OrderList;   // Array of Elements
+        OrderList =(float *) calloc(n*dim, sizeof(float));
 
-        double *tempReachabilityDistance; //Array for holding ordered reachability distances
-        tempReachabilityDistance =(double *) calloc(n,sizeof(double));
+        float *OrderReachabilityDistance; //Array for holding ordered reachability distances
+        OrderReachabilityDistance = (float *)calloc(n,sizeof(float));
 
-        double *reachabilityDistance; //Array for holding reachability distance for each element
-        reachabilityDistance =(double *) calloc(n,sizeof(double));
+        float *coreDistance; //Array for holding core distances for each Core element
+        coreDistance =(float *) calloc(n,sizeof(float));
 
-        for(i = 0; i < n; i++)
-        {
-        reachabilityDistance[i] = undefined;
-        coreDistance[i] = undefined;
-        }
+        float *tempReachabilityDistance; //Array for holding ordered reachability distances
+        tempReachabilityDistance =(float *) calloc(n,sizeof(float));
+
+        float *reachabilityDistance; //Array for holding reachability distance for each element
+        reachabilityDistance =(float *) calloc(n,sizeof(float));
 
         int *Seed;
         Seed =(int *) calloc(n,sizeof(int));
-        for(i = 0; i < n; i++)
+
+        for(i = n; i--;)
+        {
+        Cluster[i] = -1;
+        reachabilityDistance[i] = undefined;
+        coreDistance[i] = undefined;
+        visited[i] = 0; //0 for unvisited , 1 for visited
         Seed[i] = 0;
+        Noise[i] = 1;
+        Core[i] = 0;
+        }
+
+
+
 
 
 
 
 /* -------------------------------------------------------------------------- */
                   // Passing elements to Array X[n][dim]
-                 n--;
+
 
 
                     X = getData(Dataset,n,dim,X);
@@ -159,7 +156,7 @@ int main(int argc, char *argv[])
 /* -------------------------------------------------------------------------- */
 /* -------------------------------------------------------------------------- */
 h = 0;
-for(i = 0; i < n; i++)
+for(i = n; i--;)
 {
   if(visited[i] != 1)
   {
@@ -168,8 +165,8 @@ for(i = 0; i < n; i++)
 
 
 
-for(d = 0; d < dim; d++)
-  OrderList[h][d] = X[i][d];
+for(d = dim; d--;)
+  OrderList[h*dim + d] = X[i*dim + d];
   OrderReachabilityDistance[h] = undefined;
 
 
@@ -178,17 +175,19 @@ for(d = 0; d < dim; d++)
     //Finding the Neighborhood
 
        //Calculating the distance of Xi with each unvisited element
-             for(j = 0; j < n; j++)
+             for(j = n; j--;)
              {
+               belong[j] = 0; // Mark temp 0 for current Point, used for reset
                Seed[j] = 0;
+               distance[j] = 0; //Reset the distance before calculating for current point
                if(j != i)
                {
-                 belong[j] = 0; // Mark temp 0 for current Point, used for reset
-                 distance[j] = 0; //Reset the distance before calculating for current point
-                    for(d = 0; d < dim; d++)
+
+
+                    for(d = dim; d--;)
                     {
     //Calculating and storing distances of Xi element with the rest of the points
-                   distance[j] += (X[j][d] - X[i][d])*(X[j][d] - X[i][d]);
+                   distance[j] += (X[j*dim + d] - X[i*dim + d])*(X[j*dim + d] - X[i*dim + d]);
                     }
                   distance[j] = sqrt(distance[j]);
 
@@ -210,16 +209,16 @@ for(d = 0; d < dim; d++)
 
         e = 0;
 
-         for(j = 0; j < n; j++)
+         for(j = n; j--;)
          {
            if(belong[j] != 0)
            {
      reachabilityDistance[j] = 0; //Reset the distance before calculating for current point
 
-     for(d = 0; d < dim; d++)
+     for(d = dim; d--;)
      {
 //Calculating and storing distances of Xi element with the rest of the points
-    reachabilityDistance[j] += (X[j][d] - X[i][d])*(X[j][d] - X[i][d]);
+    reachabilityDistance[j] += (X[j*dim + d] - X[i*dim + d])*(X[j*dim + d] - X[i*dim + d]);
      }
    reachabilityDistance[j] = sqrt(reachabilityDistance[j]);
   tempReachabilityDistance[e] = reachabilityDistance[j];
@@ -229,7 +228,7 @@ for(d = 0; d < dim; d++)
            }
          }
 
-         qS(tempReachabilityDistance,0,e-1);
+         qSort(tempReachabilityDistance,e);
 
        //  for(j = 0; j < e; j++)
        //  {
@@ -246,7 +245,7 @@ for(d = 0; d < dim; d++)
           size = 0;
 
           min = 9999;
-          for(j = 0; j < n; j++)
+          for(j = n; j--;)
            {
                if(Seed[j] != 0)
                {
@@ -263,24 +262,25 @@ for(d = 0; d < dim; d++)
 
            Seed[location] = 0;
            visited[location] = 1;
-           for(d = 0; d < dim; d++)
-           OrderList[h][d] = X[location][d];
+           for(d = dim; d--;)
+           OrderList[h*dim + d] = X[location*dim + d];
 
            OrderReachabilityDistance[h] = reachabilityDistance[location];
            numPoints[location] = 0;
 
            h++;
 
-           for(k = 0; k < n; k++)
+           for(k = n; k--;)
            {
+             nBelong[k] = 0; // Mark temp 0 for current Point, used for reset
+             distance[k] = 0; //Reset the distance before calculating for current point
              if(k != location)
              {
-               nBelong[k] = 0; // Mark temp 0 for current Point, used for reset
-               distance[k] = 0; //Reset the distance before calculating for current point
-                  for(d = 0; d < dim; d++)
+
+                  for(d = dim; d--;)
                   {
   //Calculating and storing distances of Xi element with the rest of the points
-                 distance[k] += (X[k][d] - X[location][d])*(X[k][d] - X[location][d]);
+                 distance[k] += (X[k*dim + d] - X[location*dim + d])*(X[k*dim + d] - X[location*dim + d]);
                   }
                 distance[k] = sqrt(distance[k]);
 
@@ -301,7 +301,7 @@ for(d = 0; d < dim; d++)
             {
               e = 0;
 
-               for(k = 0; k < n; k++)
+               for(k = n; k--;)
                {
                  if(nBelong[k] != 0)
                  {
@@ -311,10 +311,10 @@ for(d = 0; d < dim; d++)
 
                       reachabilityDistance[k] = 0;
 
-                      for(d = 0; d < dim; d++)
+                      for(d = dim; d--;)
                       {
                  //Calculating and storing distances of Xi element with the rest of the points
-                     reachabilityDistance[k] += (X[k][d] - X[location][d])*(X[k][d] - X[location][d]);
+                     reachabilityDistance[k] += (X[k*dim + d] - X[location*dim + d])*(X[k*dim + d] - X[location*dim + d]);
                       }
                     reachabilityDistance[k] = sqrt(reachabilityDistance[k]);
 
@@ -329,10 +329,10 @@ for(d = 0; d < dim; d++)
                   {
                     reachabilityDistance[k] = 0;
 
-                    for(d = 0; d < dim; d++)
+                    for(d = dim; d--;)
                     {
                //Calculating and storing distances of Xi element with the rest of the points
-                   reachabilityDistance[k] += (X[k][d] - X[location][d])*(X[k][d] - X[location][d]);
+                   reachabilityDistance[k] += (X[k*dim + d] - X[location*dim + d])*(X[k*dim + d] - X[location*dim + d]);
                     }
                   reachabilityDistance[k] = sqrt(reachabilityDistance[k]);
 
@@ -345,7 +345,7 @@ for(d = 0; d < dim; d++)
                  }
                }
 
-               qS(tempReachabilityDistance,0,e-1);
+               qSort(tempReachabilityDistance,e);
          coreDistance[h] = tempReachabilityDistance[minPoints - 1];
 
        }
@@ -356,7 +356,7 @@ for(d = 0; d < dim; d++)
 
 
 
-          for(j = 0; j < n; j++)
+          for(j = n; j--;)
           {
             if(Seed[j] == 1)
             {
@@ -385,7 +385,7 @@ for(d = 0; d < dim; d++)
 /* -------------------------------------------------------------------------- */
 
 cluster = 0;
-for(j = 0; j < h; j++)
+for(j = h; j--; )
 {
     if(OrderReachabilityDistance[j] > clustDist)
       {
@@ -432,7 +432,7 @@ double total_time = ((double) (end - start)) / CLOCKS_PER_SEC;
 //
 //   }
 CounterNoise = 0;
-for(i = 0; i < h; i++)
+for(i = h; i--;)
 {
   if(Noise[i] == 1)
   {
@@ -453,11 +453,11 @@ FILE* NoiseFile;
 
 NoiseFile = fopen("FinalNoise.txt","w");
 
-for(j = 0; j < h; j++){
+for(j = h; j--;){
   if(Noise[j] == 1)
   {
-    for(d = 0; d < dim; d++)
-    fprintf(NoiseFile, "%lf ",OrderList[j][d] );
+    for(d = dim; d--;)
+    fprintf(NoiseFile, "%lf ",OrderList[j*dim + d] );
 
     fprintf(NoiseFile, "\n");
   }
@@ -468,7 +468,7 @@ FILE* ReachabilityDistFile;
 
 ReachabilityDistFile = fopen("ReachabilityDist.txt","w");
 
-for(j = 0; j < h; j++)
+for(j = h; j--;)
 {
   fprintf(ReachabilityDistFile, "%lf \n",OrderReachabilityDistance[j]);
 }
@@ -479,7 +479,7 @@ FILE* CoreFile;
 
 CoreFile = fopen("CoreDist.txt","w");
 
-for(j = 0; j < h; j++)
+for(j = h; j--;)
 {
   fprintf(CoreFile, "%lf \n",coreDistance[j]);
 }
@@ -490,11 +490,11 @@ FILE* OrderFile;
 
 OrderFile = fopen("OrderList.txt","w");
 
-for(j = 0; j < h; j++)
+for(j = h; j--;)
 {
 
-  for(d = 0; d < dim; d++)
-  fprintf(OrderFile, "%lf ",OrderList[j][d]);
+  for(d = dim; d--;)
+  fprintf(OrderFile, "%lf ",OrderList[j*dim + d]);
 
   fprintf(OrderFile, "\n");
 }
@@ -512,8 +512,7 @@ free(fileName);
 }
 
 /* -------------------------------------------------------------------------- */
-for(i = 0; i < n; i++)
-free(X[i]);
+
 free(X);
 free(Cluster);
 free(visited);
@@ -523,11 +522,7 @@ free(belong);
 free(numPoints);
 free(distance);
 free(Core);
-for(i = 0; i < n; i++)
-free(distance2[i]);
 free(distance2);
-for(i = 0; i < n; i++)
-free(OrderList[i]);
 free(OrderList);
 free(OrderReachabilityDistance);
 free(coreDistance);
